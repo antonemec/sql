@@ -315,23 +315,23 @@
             </div>
             
             <div class="code-block">
--- Крок 1: Підготовка даних клієнтів
-SELECT 
-    client_id,
-    client_name,
-    age,
-    credit_limit,
-    used_limit,
-    (credit_limit - used_limit) AS available_limit,
-    phone_number
-INTO #client_data
-FROM clients
-WHERE active = 1 
-  AND (credit_limit - used_limit) > 0;
-
--- Крок 2: Підготовка даних співробітників
-SELECT 
-    employee_id,
+<br>-- Крок 1: Підготовка даних клієнтів
+<br>SELECT 
+<br>    client_id,
+<br>    client_name,
+<br>    age,
+<br>    credit_limit,
+<br>    used_limit,
+<br>    (credit_limit - used_limit) AS available_limit,
+<br>    phone_number
+<br>INTO #client_data
+<br>FROM clients
+<br>WHERE active = 1 
+<br>  AND (credit_limit - used_limit) > 0;
+<br>
+<br>-- Крок 2: Підготовка даних співробітників
+<br>SELECT 
+<br>    employee_id,
     employee_name,
     ROW_NUMBER() OVER (ORDER BY employee_id) AS emp_rank
 INTO #employees
