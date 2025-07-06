@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Розподіл дзвінків за SQL - Навчальний матеріал</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .algorithm-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .step {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .step:hover {
+            transform: scale(1.05);
+        }
+
+        .step-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .visualization {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+        }
+
+        .client-table, .employee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .client-table th, .employee-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .client-table td, .employee-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .client-table tr:hover, .employee-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .balance-bar {
+            height: 30px;
+            background: linear-gradient(90deg, #00b894, #fdcb6e);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .highlight {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .formula {
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .algorithm-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Розподіл дзвінків за SQL</h1>
+            <p>Навчальний матеріал по рівномірному розподілу клієнтів між співробітниками</p>
+        </div>
+
+        <div class="section">
+            <h2>📋 Постановка задачі</h2>
+            <p>Необхідно розподілити клієнтів між співробітниками так, щоб:</p>
+            <ul style="margin: 15px 0 15px 30px;">
+                <li>Кожний співробітник отримав максимум 20 дзвінків на тиждень</li>
+                <li>Загальна сума доступних лімітів була рівномірно розподілена</li>
+                <li>Мінімізувати відхилення між співробітниками</li>
+            </ul>
+            
+            <div class="formula">
+                Доступний ліміт = Загальний ліміт - Використаний ліміт
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Алгоритм розподілу</h2>
+            <div class="algorithm-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Підготовка даних</h3>
+                    <p>Вибираємо активних клієнтів та розраховуємо доступні ліміти</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Сортування</h3>
+                    <p>Сортуємо клієнтів за доступним лімітом (від більшого до меншого)</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Round-Robin</h3>
+                    <p>Розподіляємо клієнтів циклічно між співробітниками</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Обмеження</h3>
+                    <p>Застосовуємо ліміт 20 дзвінків на співробітника</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Інтерактивна демонстрація</h2>
+            <div class="interactive-demo">
+                <h3>Приклад розподілу</h3>
+                <div class="demo-controls">
+                    <button class="demo-button" onclick="generateData()">Згенерувати дані</button>
+                    <button class="demo-button" onclick="distributeClients()">Розподілити клієнтів</button>
+                    <button class="demo-button" onclick="showBalance()">Показати баланс</button>
+                </div>
+                
+                <div id="demo-results">
+                    <div class="visualization">
+                        <h4>Клієнти (приклад)</h4>
+                        <table class="client-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Ім'я</th>
+                                    <th>Вік</th>
+                                    <th>Ліміт</th>
+                                    <th>Використано</th>
+                                    <th>Доступно</th>
+                                </tr>
+                            </thead>
+                            <tbody id="client-data">
+                                <tr><td>1</td><td>Іван П.</td><td>35</td><td>50000</td><td>15000</td><td>35000</td></tr>
+                                <tr><td>2</td><td>Марія К.</td><td>28</td><td>80000</td><td>20000</td><td>60000</td></tr>
+                                <tr><td>3</td><td>Олег М.</td><td>42</td><td>30000</td><td>25000</td><td>5000</td></tr>
+                                <tr><td>4</td><td>Анна Л.</td><td>31</td><td>45000</td><td>10000</td><td>35000</td></tr>
+                                <tr><td>5</td><td>Петро В.</td><td>39</td><td>70000</td><td>30000</td><td>40000</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💻 SQL Код (Sybase IQ)</h2>
+            <div class="highlight">
+                <strong>Увага:</strong> Код адаптований для Sybase IQ без використання CTE та рекурсивних запитів
+            </div>
+            
+            <div class="code-block">
+-- Крок 1: Підготовка даних клієнтів
+SELECT 
+    client_id,
+    client_name,
+    age,
+    credit_limit,
+    used_limit,
+    (credit_limit - used_limit) AS available_limit,
+    phone_number
+INTO #client_data
+FROM clients
+WHERE active = 1 
+  AND (credit_limit - used_limit) > 0;
+
+-- Крок 2: Підготовка даних співробітників
+SELECT 
+    employee_id,
+    employee_name,
+    ROW_NUMBER() OVER (ORDER BY employee_id) AS emp_rank
+INTO #employees
+FROM employees
+WHERE active = 1;
+
+-- Крок 3: Сортування клієнтів
+SELECT 
+    *,
+    ROW_NUMBER() OVER (ORDER BY available_limit DESC, client_id) AS client_rank
+INTO #sorted_clients
+FROM #client_data;
+
+-- Крок 4: Розподіл клієнтів
+SELECT 
+    sc.client_id,
+    sc.client_name,
+    sc.available_limit,
+    sc.phone_number,
+    -- Round-robin розподіл
+    ((sc.client_rank - 1) % (SELECT COUNT(*) FROM #employees)) + 1 AS assigned_emp_rank
+INTO #base_assignment
+FROM #sorted_clients sc;
+
+-- Крок 5: Призначення співробітників
+SELECT 
+    ba.*,
+    e.employee_id,
+    e.employee_name,
+    ROW_NUMBER() OVER (PARTITION BY e.employee_id ORDER BY ba.available_limit DESC) AS call_number
+INTO #final_assignment
+FROM #base_assignment ba
+JOIN #employees e ON e.emp_rank = ba.assigned_emp_rank;
+
+-- Крок 6: Фінальний результат
+SELECT 
+    employee_id,
+    employee_name,
+    client_id,
+    client_name,
+    available_limit,
+    phone_number,
+    call_number
+FROM #final_assignment
+WHERE call_number <= 20
+ORDER BY employee_id, call_number;
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Результати розподілу</h2>
+            <div id="balance-chart" class="chart-container">
+                <canvas id="balanceCanvas" width="400" height="200"></canvas>
+            </div>
+            
+            <div class="visualization">
+                <h4>Баланс співробітників</h4>
+                <table class="employee-table">
+                    <thead>
+                        <tr>
+                            <th>Співробітник</th>
+                            <th>Кількість дзвінків</th>
+                            <th>Загальний ліміт</th>
+                            <th>Середній ліміт</th>
+                            <th>Баланс</th>
+                        </tr>
+                    </thead>
+                    <tbody id="balance-data">
+                        <tr>
+                            <td>Співробітник 1</td>
+                            <td>20</td>
+                            <td>175000</td>
+                            <td>8750</td>
+                            <td><div class="balance-bar">Збалансовано</div></td>
+                        </tr>
+                        <tr>
+                            <td>Співробітник 2</td>
+                            <td>20</td>
+                            <td>180000</td>
+                            <td>9000</td>
+                            <td><div class="balance-bar">Збалансовано</div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Ключові переваги</h2>
+            <div class="algorithm-steps">
+                <div class="step">
+                    <div class="step-number">✅</div>
+                    <h3>Простота</h3>
+                    <p>Без складних CTE та рекурсії</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">⚡</div>
+                    <h3>Продуктивність</h3>
+                    <p>Оптимізовано для Sybase IQ</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">⚖️</div>
+                    <h3>Збалансованість</h3>
+                    <p>Рівномірний розподіл лімітів</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">🔧</div>
+                    <h3>Гнучкість</h3>
+                    <p>Легко адаптується під потреби</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Дані для демонстрації
+        let clients = [
+            {id: 1, name: 'Іван П.', age: 35, limit: 50000, used: 15000, available: 35000},
+            {id: 2, name: 'Марія К.', age: 28, limit: 80000, used: 20000, available: 60000},
+            {id: 3, name: 'Олег М.', age: 42, limit: 30000, used: 25000, available: 5000},
+            {id: 4, name: 'Анна Л.', age: 31, limit: 45000, used: 10000, available: 35000},
+            {id: 5, name: 'Петро В.', age: 39, limit: 70000, used: 30000, available: 40000},
+            {id: 6, name: 'Світлана Р.', age: 45, limit: 60000, used: 15000, available: 45000},
+            {id: 7, name: 'Андрій С.', age: 33, limit: 40000, used: 20000, available: 20000},
+            {id: 8, name: 'Ольга Т.', age: 29, limit: 35000, used: 10000, available: 25000}
+        ];
+
+        let employees = [
+            {id: 1, name: 'Співробітник 1'},
+            {id: 2, name: 'Співробітник 2'},
+            {id: 3, name: 'Співробітник 3'}
+        ];
+
+        let assignments = [];
+
+        function generateData() {
+            // Генерація випадкових даних
+            clients.forEach(client => {
+                client.limit = Math.floor(Math.random() * 80000) + 20000;
+                client.used = Math.floor(Math.random() * client.limit * 0.7);
+                client.available = client.limit - client.used;
+            });
+            
+            updateClientTable();
+        }
+
+        function updateClientTable() {
+            const tbody = document.getElementById('client-data');
+            tbody.innerHTML = '';
+            
+            clients.forEach(client => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${client.id}</td>
+                    <td>${client.name}</td>
+                    <td>${client.age}</td>
+                    <td>${client.limit.toLocaleString()}</td>
+                    <td>${client.used.toLocaleString()}</td>
+                    <td><strong>${client.available.toLocaleString()}</strong></td>
+                `;
+            });
+        }
+
+        function distributeClients() {
+            // Сортування клієнтів за доступним лімітом
+            const sortedClients = [...clients].sort((a, b) => b.available - a.available);
+            
+            // Розподіл між співробітниками
+            assignments = [];
+            sortedClients.forEach((client, index) => {
+                const empIndex = index % employees.length;
+                assignments.push({
+                    ...client,
+                    employeeId: employees[empIndex].id,
+                    employeeName: employees[empIndex].name
+                });
+            });
+            
+            showDistributionResults();
+        }
+
+        function showDistributionResults() {
+            const resultDiv = document.getElementById('demo-results');
+            
+            let html = '<div class="visualization"><h4>Результати розподілу</h4>';
+            
+            employees.forEach(emp => {
+                const empAssignments = assignments.filter(a => a.employeeId === emp.id);
+                const totalLimit = empAssignments.reduce((sum, a) => sum + a.available, 0);
+                
+                html += `
+                    <h5>${emp.name} (${empAssignments.length} дзвінків, ${totalLimit.toLocaleString()} лімітів)</h5>
+                    <table class="client-table" style="margin-bottom: 20px;">
+                        <thead>
+                            <tr><th>Клієнт</th><th>Доступний ліміт</th><th>Телефон</th></tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                empAssignments.forEach(assignment => {
+                    html += `
+                        <tr>
+                            <td>${assignment.name}</td>
+                            <td>${assignment.available.toLocaleString()}</td>
+                            <td>+380XX XXX XXXX</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+            });
+            
+            html += '</div>';
+            resultDiv.innerHTML = html;
+        }
+
+        function showBalance() {
+            const balanceData = employees.map(emp => {
+                const empAssignments = assignments.filter(a => a.employeeId === emp.id);
+                const totalLimit = empAssignments.reduce((sum, a) => sum + a.available, 0);
+                const avgLimit = empAssignments.length > 0 ? totalLimit / empAssignments.length : 0;
+                
+                return {
+                    name: emp.name,
+                    calls: empAssignments.length,
+                    totalLimit: totalLimit,
+                    avgLimit: avgLimit
+                };
+            });
+            
+            // Оновлення таблиці балансу
+            const tbody = document.getElementById('balance-data');
+            tbody.innerHTML = '';
+            
+            balanceData.forEach(emp => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${emp.name}</td>
+                    <td>${emp.calls}</td>
+                    <td>${emp.totalLimit.toLocaleString()}</td>
+                    <td>${Math.round(emp.avgLimit).toLocaleString()}</td>
+                    <td><div class="balance-bar">Збалансовано</div></td>
+                `;
+            });
+            
+            // Малювання графіка
+            drawBalanceChart(balanceData);
+        }
+
+        function drawBalanceChart(data) {
+            const canvas = document.getElementById('balanceCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Очищення canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Налаштування
+            const barWidth = 80;
+            const barSpacing = 50;
+            const maxValue = Math.max(...data.map(d => d.totalLimit));
+            const scale = (canvas.height - 60) / maxValue;
+            
+            // Малювання стовпчиків
+            data.forEach((emp, index) => {
+                const x = 50 + index * (barWidth + barSpacing);
+                const barHeight = emp.totalLimit * scale;
+                const y = canvas.height - barHeight - 30;
+                
+                // Градієнт
+                const gradient = ctx.createLinearGradient(0, y, 0, y + barHeight);
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                // Підписи
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(emp.name, x + barWidth/2, canvas.height - 5);
+                ctx.fillText(emp.totalLimit.toLocaleString(), x + barWidth/2, y - 5);
+            });
+        }
+
+        // Ініціалізація
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClientTable();
+            showBalance();
+        });
+    </script>
+</body>
+</html>
