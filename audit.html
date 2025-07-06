@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аудит банківського ринку України</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .status {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .metric-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .bank-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .bank-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .bank-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .bank-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .bank-rating {
+            color: #f39c12;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .chart-container {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .export-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            transform: scale(1.2);
+        }
+
+        .data-sources {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .source-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .source-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 Аудит банківського ринку України</h1>
+            <p>Автоматичний аналіз та звітність по банківському сектору</p>
+        </div>
+
+        <div class="control-panel">
+            <h2>Налаштування аудиту</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div class="form-group">
+                    <label for="analysisType">Тип аналізу:</label>
+                    <select id="analysisType">
+                        <option value="full">Повний аудит</option>
+                        <option value="financial">Фінансовий аналіз</option>
+                        <option value="market">Ринкова позиція</option>
+                        <option value="regulatory">Нормативна відповідність</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportPeriod">Період звітності:</label>
+                    <select id="reportPeriod">
+                        <option value="weekly">Тижневий</option>
+                        <option value="monthly">Місячний</option>
+                        <option value="quarterly">Квартальний</option>
+                        <option value="yearly">Річний</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bankFilter">Фільтр банків:</label>
+                    <select id="bankFilter">
+                        <option value="all">Усі банки</option>
+                        <option value="top10">Топ-10 за активами</option>
+                        <option value="systemically">Системно важливі</option>
+                        <option value="foreign">Іноземні банки</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="customParams">Додаткові параметри:</label>
+                <textarea id="customParams" rows="3" placeholder="Введіть специфічні вимоги до аналізу..."></textarea>
+            </div>
+            <button class="btn" onclick="startAudit()">🚀 Запустити аудит</button>
+            <button class="btn" onclick="scheduleAudit()">📅 Запланувати</button>
+        </div>
+
+        <div class="data-sources">
+            <h3>Джерела даних</h3>
+            <div id="dataSources">
+                <div class="source-item">
+                    <span>НБУ API</span>
+                    <span class="source-status status-active">Активно</span>
+                </div>
+                <div class="source-item">
+                    <span>Фінансова звітність</span>
+                    <span class="source-status status-active">Активно</span>
+                </div>
+                <div class="source-item">
+                    <span>Рейтингові агентства</span>
+                    <span class="source-status status-pending">Очікування</span>
+                </div>
+                <div class="source-item">
+                    <span>Новини та аналітика</span>
+                    <span class="source-status status-active">Активно</span>
+                </div>
+                <div class="source-item">
+                    <span>Соціальні мережі</span>
+                    <span class="source-status status-inactive">Неактивно</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="auditStatus" style="display: none;">
+            <h3>Статус аудиту</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="statusText">Підготовка до аудиту...</div>
+            <div id="currentTask">Ініціалізація системи</div>
+        </div>
+
+        <div class="results" id="results">
+            <h2>Результати аудиту</h2>
+            <div id="auditDate"></div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div class="metric-card">
+                    <h3>Всього банків</h3>
+                    <div class="metric-value" id="totalBanks">67</div>
+                    <small>Активні банки України</small>
+                </div>
+                <div class="metric-card">
+                    <h3>Сукупні активи</h3>
+                    <div class="metric-value" id="totalAssets">2.1T</div>
+                    <small>грн</small>
+                </div>
+                <div class="metric-card">
+                    <h3>Середня рентабельність</h3>
+                    <div class="metric-value" id="avgROA">12.5%</div>
+                    <small>ROA</small>
+                </div>
+                <div class="metric-card">
+                    <h3>Капіталізація</h3>
+                    <div class="metric-value" id="capitalization">18.7%</div>
+                    <small>Н1</small>
+                </div>
+            </div>
+
+            <div class="bank-list" id="bankList">
+                <!-- Банки будуть додані динамічно -->
+            </div>
+
+            <div class="chart-container">
+                <h3>Графік динаміки ринку</h3>
+                <canvas id="marketChart" width="800" height="400"></canvas>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <h3>Експорт звіту</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="exportExecutive" checked>
+                    <label for="exportExecutive">Виконавче резюме</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="exportFinancial" checked>
+                    <label for="exportFinancial">Фінансовий аналіз</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="exportRisk" checked>
+                    <label for="exportRisk">Ризик-аналіз</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="exportMarket" checked>
+                    <label for="exportMarket">Ринкові тенденції</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="exportRegulatory" checked>
+                    <label for="exportRegulatory">Нормативна відповідність</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="exportRecommendations" checked>
+                    <label for="exportRecommendations">Рекомендації</label>
+                </div>
+            </div>
+            <button class="btn" onclick="exportReport()">📄 Створити HTML звіт</button>
+            <button class="btn" onclick="exportPDF()">📋 Експорт PDF</button>
+            <button class="btn" onclick="exportExcel()">📊 Експорт Excel</button>
+        </div>
+    </div>
+
+    <script>
+        let auditInProgress = false;
+        let auditData = {};
+
+        const sampleBanks = [
+            { name: 'ПриватБанк', assets: 385000, rating: 4.2, roa: 15.3, capital: 19.2 },
+            { name: 'Ощадбанк', assets: 195000, rating: 4.0, roa: 12.1, capital: 18.9 },
+            { name: 'ПУМБ', assets: 89000, rating: 4.3, roa: 14.7, capital: 20.1 },
+            { name: 'Райффайзен Банк', assets: 76000, rating: 4.5, roa: 16.2, capital: 21.3 },
+            { name: 'УкрСиббанк', assets: 67000, rating: 4.1, roa: 13.8, capital: 19.7 },
+            { name: 'КРЕДІ АГРІКОЛЬ', assets: 54000, rating: 4.4, roa: 15.9, capital: 22.1 },
+            { name: 'Альфа-Банк', assets: 52000, rating: 4.2, roa: 14.5, capital: 20.8 },
+            { name: 'ОТП Банк', assets: 48000, rating: 4.0, roa: 13.2, capital: 18.4 }
+        ];
+
+        const auditTasks = [
+            { name: 'Збір даних з НБУ', duration: 15 },
+            { name: 'Аналіз фінансової звітності', duration: 25 },
+            { name: 'Обробка ринкових даних', duration: 20 },
+            { name: 'Розрахунок показників', duration: 15 },
+            { name: 'Аналіз ризиків', duration: 10 },
+            { name: 'Генерування висновків', duration: 10 },
+            { name: 'Підготовка звіту', duration: 5 }
+        ];
+
+        function startAudit() {
+            if (auditInProgress) return;
+            
+            auditInProgress = true;
+            document.getElementById('auditStatus').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            let currentProgress = 0;
+            let taskIndex = 0;
+            
+            const updateProgress = () => {
+                if (taskIndex >= auditTasks.length) {
+                    completeAudit();
+                    return;
+                }
+                
+                const task = auditTasks[taskIndex];
+                document.getElementById('currentTask').textContent = task.name;
+                
+                const targetProgress = ((taskIndex + 1) / auditTasks.length) * 100;
+                const progressAnimation = setInterval(() => {
+                    currentProgress += 2;
+                    if (currentProgress >= targetProgress) {
+                        currentProgress = targetProgress;
+                        clearInterval(progressAnimation);
+                        taskIndex++;
+                        setTimeout(updateProgress, 500);
+                    }
+                    
+                    document.getElementById('progressFill').style.width = currentProgress + '%';
+                    document.getElementById('statusText').textContent = `Виконано: ${Math.round(currentProgress)}%`;
+                }, 100);
+            };
+            
+            updateProgress();
+        }
+
+        function completeAudit() {
+            auditInProgress = false;
+            document.getElementById('auditStatus').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            // Оновлення дати
+            const now = new Date();
+            document.getElementById('auditDate').textContent = `Дата аудиту: ${now.toLocaleDateString('uk-UA')} ${now.toLocaleTimeString('uk-UA')}`;
+            
+            // Генерування даних
+            generateBankList();
+            generateChart();
+            
+            // Симуляція реальних даних
+            auditData = {
+                totalBanks: 67,
+                totalAssets: 2100000,
+                avgROA: 12.5,
+                capitalization: 18.7,
+                banks: sampleBanks
+            };
+        }
+
+        function generateBankList() {
+            const bankList = document.getElementById('bankList');
+            bankList.innerHTML = '';
+            
+            sampleBanks.forEach(bank => {
+                const bankCard = document.createElement('div');
+                bankCard.className = 'bank-card';
+                bankCard.innerHTML = `
+                    <div class="bank-name">${bank.name}</div>
+                    <div class="bank-rating">${'★'.repeat(Math.floor(bank.rating))} ${bank.rating}</div>
+                    <div><strong>Активи:</strong> ${bank.assets.toLocaleString()} млн грн</div>
+                    <div><strong>ROA:</strong> ${bank.roa}%</div>
+                    <div><strong>Капіталізація:</strong> ${bank.capital}%</div>
+                `;
+                bankList.appendChild(bankCard);
+            });
+        }
+
+        function generateChart() {
+            const canvas = document.getElementById('marketChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Очищення canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Простий графік активів банків
+            const bankNames = sampleBanks.map(bank => bank.name);
+            const bankAssets = sampleBanks.map(bank => bank.assets);
+            
+            const maxAssets = Math.max(...bankAssets);
+            const chartHeight = 300;
+            const chartWidth = 700;
+            const barWidth = chartWidth / bankNames.length;
+            
+            // Малювання осей
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 350);
+            ctx.lineTo(750, 350);
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, 350);
+            ctx.stroke();
+            
+            // Малювання стовпців
+            bankAssets.forEach((assets, index) => {
+                const barHeight = (assets / maxAssets) * chartHeight;
+                const x = 50 + index * barWidth + barWidth * 0.1;
+                const y = 350 - barHeight;
+                
+                // Градієнт для стовпця
+                const gradient = ctx.createLinearGradient(0, y, 0, 350);
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barWidth * 0.8, barHeight);
+                
+                // Назва банку
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.save();
+                ctx.translate(x + barWidth * 0.4, 370);
+                ctx.rotate(-Math.PI / 4);
+                ctx.fillText(bankNames[index], 0, 0);
+                ctx.restore();
+            });
+            
+            // Заголовок
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('Активи банків (млн грн)', 300, 30);
+        }
+
+        function scheduleAudit() {
+            const schedule = prompt('Введіть розклад (наприклад: "щопонеділка о 9:00")');
+            if (schedule) {
+                alert(`Аудит запланований: ${schedule}`);
+            }
+        }
+
+        function exportReport() {
+            const reportData = {
+                executiveSummary: document.getElementById('exportExecutive').checked,
+                financialAnalysis: document.getElementById('exportFinancial').checked,
+                riskAnalysis: document.getElementById('exportRisk').checked,
+                marketTrends: document.getElementById('exportMarket').checked,
+                regulatoryCompliance: document.getElementById('exportRegulatory').checked,
+                recommendations: document.getElementById('exportRecommendations').checked
+            };
+            
+            generateHTMLReport(reportData);
+        }
+
+        function generateHTMLReport(sections) {
+            const reportWindow = window.open('', '_blank');
+            const reportHTML = `
+                <!DOCTYPE html>
+                <html lang="uk">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Звіт аудиту банківського ринку України</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                        .header { text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 30px; }
+                        .section { margin-bottom: 30px; page-break-inside: avoid; }
+                        .section h2 { color: #2c3e50; border-left: 5px solid #667eea; padding-left: 15px; }
+                        .metric { display: inline-block; margin: 10px; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+                        .bank-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        .bank-table th, .bank-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                        .bank-table th { background: #667eea; color: white; }
+                        .recommendation { background: #e8f4f8; padding: 15px; border-left: 4px solid #17a2b8; margin: 15px 0; }
+                        @media print { body { margin: 20px; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>🏦 Звіт аудиту банківського ринку України</h1>
+                        <p>Дата: ${new Date().toLocaleDateString('uk-UA')}</p>
+                    </div>
+                    
+                    ${sections.executiveSummary ? `
+                    <div class="section">
+                        <h2>Виконавче резюме</h2>
+                        <p>Банківський сектор України демонструє стабільність та позитивну динаміку. Загальна кількість активних банків становить 67, з сукупними активами 2,1 трлн грн.</p>
+                        <div class="metric">
+                            <strong>Всього банків:</strong> 67
+                        </div>
+                        <div class="metric">
+                            <strong>Сукупні активи:</strong> 2,1 трлн грн
+                        </div>
+                        <div class="metric">
+                            <strong>Середня рентабельність:</strong> 12,5%
+                        </div>
+                        <div class="metric">
+                            <strong>Капіталізація:</strong> 18,7%
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${sections.financialAnalysis ? `
+                    <div class="section">
+                        <h2>Фінансовий аналіз</h2>
+                        <table class="bank-table">
+                            <thead>
+                                <tr>
+                                    <th>Банк</th>
+                                    <th>Активи (млн грн)</th>
+                                    <th>ROA (%)</th>
+                                    <th>Капіталізація (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${sampleBanks.map(bank => `
+                                    <tr>
+                                        <td>${bank.name}</td>
+                                        <td>${bank.assets.toLocaleString()}</td>
+                                        <td>${bank.roa}</td>
+                                        <td>${bank.capital}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ` : ''}
+                    
+                    ${sections.riskAnalysis ? `
+                    <div class="section">
+                        <h2>Ризик-аналіз</h2>
+                        <p>Основні ризики банківського сектору:</p>
+                        <ul>
+                            <li>Кредитний ризик - помірний рівень</li>
+                            <li>Ліквідний ризик - низький рівень</li>
+                            <li>Операційний ризик - помірний рівень</li>
+                            <li>Ринковий ризик - підвищений рівень</li>
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    ${sections.marketTrends ? `
+                    <div class="section">
+                        <h2>Ринкові тенденції</h2>
+                        <p>Ключові тенденції розвитку банківського ринку:</p>
+                        <ul>
+                            <li>Зростання цифрових послуг</li>
+                            <li>Консолідація ринку</li>
+                            <li>Розвиток фінтех-рішень</li>
+                            <li>Посилення регулювання</li>
+                        </ul>
+                    </div>
+                    ` : ''}
+                    
+                    ${sections.regulatoryCompliance ? `
+                    <div class="section">
+                        <h2>Нормативна відповідність</h2>
+                        <p>Відповідність нормативам НБУ:</p>
+                        <ul>
+                            <li>Норматив достатності капіталу (Н1): 95% банків відповідають</li>
+                            <li>Норматив миттєвої ліквідності (Н4): 98% банків відповідають</li>
+                            <li>Норматив поточ
