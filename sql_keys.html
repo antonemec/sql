@@ -332,42 +332,42 @@
 <br>-- Крок 2: Підготовка даних співробітників
 <br>SELECT 
 <br>    employee_id,
-    employee_name,
-    ROW_NUMBER() OVER (ORDER BY employee_id) AS emp_rank
-INTO #employees
-FROM employees
-WHERE active = 1;
-
--- Крок 3: Сортування клієнтів
-SELECT 
+<br>    employee_name,
+<br>    ROW_NUMBER() OVER (ORDER BY employee_id) AS emp_rank
+<br>INTO #employees
+<br>FROM employees
+<br>WHERE active = 1;
+<br>
+<br>-- Крок 3: Сортування клієнтів
+<br>SELECT 
     *,
     ROW_NUMBER() OVER (ORDER BY available_limit DESC, client_id) AS client_rank
-INTO #sorted_clients
-FROM #client_data;
-
--- Крок 4: Розподіл клієнтів
-SELECT 
+<br>INTO #sorted_clients
+<br>FROM #client_data;
+<br>
+<br>-- Крок 4: Розподіл клієнтів
+<br>SELECT 
     sc.client_id,
     sc.client_name,
     sc.available_limit,
     sc.phone_number,
     -- Round-robin розподіл
     ((sc.client_rank - 1) % (SELECT COUNT(*) FROM #employees)) + 1 AS assigned_emp_rank
-INTO #base_assignment
-FROM #sorted_clients sc;
-
--- Крок 5: Призначення співробітників
-SELECT 
+<br>INTO #base_assignment
+<br>FROM #sorted_clients sc;
+<br>
+<br>-- Крок 5: Призначення співробітників
+<br>SELECT 
     ba.*,
     e.employee_id,
     e.employee_name,
     ROW_NUMBER() OVER (PARTITION BY e.employee_id ORDER BY ba.available_limit DESC) AS call_number
-INTO #final_assignment
-FROM #base_assignment ba
-JOIN #employees e ON e.emp_rank = ba.assigned_emp_rank;
-
--- Крок 6: Фінальний результат
-SELECT 
+<br>INTO #final_assignment
+<br>FROM #base_assignment ba
+<br>JOIN #employees e ON e.emp_rank = ba.assigned_emp_rank;
+<br>
+<br>-- Крок 6: Фінальний результат
+<br>SELECT 
     employee_id,
     employee_name,
     client_id,
@@ -375,9 +375,9 @@ SELECT
     available_limit,
     phone_number,
     call_number
-FROM #final_assignment
-WHERE call_number <= 20
-ORDER BY employee_id, call_number;
+<br>FROM #final_assignment
+<br>WHERE call_number <= 20
+<br>ORDER BY employee_id, call_number;
             </div>
         </div>
 
