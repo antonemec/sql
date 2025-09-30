@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дорожня карта експерта з кредитного портфеля</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a vertical, single-page learning roadmap. It uses a fixed top navigation bar for quick access to key learning modules (Foundation, Acquisition, Servicing, Risk, etc.). This structure was chosen over a multi-page site to provide a seamless, linear learning experience, allowing the user to scroll through the entire roadmap or jump to specific topics of interest. The flow progresses from fundamental concepts to specialized areas, mirroring a logical educational path. Interactivity is focused on information discovery through clickable accordion sections, which reveal detailed content without cluttering the UI, making complex information digestible. This design directly addresses the user's need for a structured "roadmap" and "resources" in a user-friendly, explorable format. -->
+    <!-- Visualization & Content Choices: Report Info: Request for a learning roadmap on credit card portfolio management. Goal: Organize and present a structured learning path. Viz/Presentation: I've used styled HTML/CSS to create diagrams and visual structures like a customer lifecycle funnel and a timeline-based roadmap. For instance, the roadmap is a flexbox-based layout with distinct phases, visually guiding the user through their learning journey. Interaction: Click-to-expand accordions are used to manage information density, allowing users to drill down into specifics. Justification: Since the source is a request for information, not data, traditional charts are unnecessary. Instead, structural visualizations (like funnels and timelines) and interactive text containers are more effective for organizing and presenting this educational content clearly. Library/Method: Vanilla JavaScript for interactions (accordions, smooth scrolling) and Tailwind CSS for all styling and layout, ensuring a clean, responsive design without external graphics. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #007bff;
+            transform: translateY(-2px);
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .accordion-button.open .arrow {
+            transform: rotate(180deg);
+        }
+        .arrow {
+            transition: transform 0.3s ease;
+        }
+        .roadmap-step {
+            position: relative;
+            padding-left: 2.5rem;
+            padding-bottom: 2rem;
+            border-left: 2px solid #e9ecef;
+        }
+        .roadmap-step:last-child {
+            border-left: 2px solid transparent;
+            padding-bottom: 0;
+        }
+        .roadmap-dot {
+            position: absolute;
+            left: -0.6rem;
+            top: 0.25rem;
+            height: 1.125rem;
+            width: 1.125rem;
+            background-color: #007bff;
+            border-radius: 9999px;
+            border: 3px solid #f8f9fa;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">Експерт з кредитного портфеля</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#foundation" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Фундамент</a>
+                        <a href="#lifecycle" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Життєвий цикл</a>
+                        <a href="#roadmap" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Roadmap</a>
+                        <a href="#resources" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Ресурси</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section id="intro" class="text-center mb-16">
+            <h2 class="text-4xl font-extrabold text-gray-900 mb-4">Станьте експертом з управління портфелем кредитних карток</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">Ця дорожня карта проведе вас через ключові етапи та знання, необхідні для ефективного вирішення проблем та управління кредитним портфелем – від залучення клієнтів до управління ризиками.</p>
+        </section>
+
+        <section id="foundation" class="mb-16">
+            <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center">Фундаментальні знання</h3>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Перш ніж занурюватися у специфіку, важливо зрозуміти основи, на яких будується весь картковий бізнес. Це ваш фундамент для прийняття зважених рішень.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h4 class="font-bold text-lg mb-2 text-blue-600">Бізнес-модель кредитної картки</h4>
+                    <p class="text-gray-600">Зрозумійте, як банки заробляють гроші: процентний дохід, комісії (річне обслуговування, interchange fee), штрафи. Вивчіть P&L (звіт про прибутки та збитки) карткового продукту.</p>
+                </div>
+                <div class="card p-6">
+                    <h4 class="font-bold text-lg mb-2 text-blue-600">Ключові метрики (KPIs)</h4>
+                    <p class="text-gray-600">Ознайомтеся з основними показниками: обсяг портфеля, рівень проникнення, активація, використання ліміту (utilization), рівень прострочення (delinquency), вартість залучення (CAC), довічна цінність клієнта (LTV).</p>
+                </div>
+                <div class="card p-6">
+                    <h4 class="font-bold text-lg mb-2 text-blue-600">Регуляторне середовище</h4>
+                    <p class="text-gray-600">Вивчіть основні закони та нормативи, що регулюють споживче кредитування у вашій країні (наприклад, закони про захист прав споживачів, вимоги НБУ).</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="lifecycle" class="mb-16">
+            <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center">Життєвий цикл клієнта та ключові напрямки</h3>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Управління портфелем — це управління клієнтами на кожному етапі їх взаємодії з продуктом. Розглянемо ваші ключові запити в контексті цього циклу.</p>
+            
+            <div id="accordion-container" class="space-y-4 max-w-4xl mx-auto">
+                
+                <div class="card overflow-hidden">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-gray-700">
+                        <span>1. Залучення (Acquisition)</span>
+                        <span class="arrow text-blue-500">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-200">
+                            <h5 class="font-semibold mb-2">Мета: Залучити правильних клієнтів за оптимальною ціною.</h5>
+                            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                                <li><strong>Цільова аудиторія:</strong> Визначення профілю ідеального клієнта (дохід, вік, кредитна історія).</li>
+                                <li><strong>Канали залучення:</strong> Цифрові (онлайн-реклама, SEO, SMM), партнерські (рітейлери, авіакомпанії), фізичні (відділення, агенти).</li>
+                                <li><strong>Ціннісна пропозиція (UVP):</strong> Чим ваш продукт кращий за конкурентів (кешбек, пільговий період, бонуси)?</li>
+                                <li><strong>Воронка залучення:</strong> Аналіз конверсії на кожному етапі: від заявки до видачі та активації картки.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card overflow-hidden">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-gray-700">
+                        <span>2. Просування та Комунікації (Promotion & Communications)</span>
+                        <span class="arrow text-blue-500">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-200">
+                            <h5 class="font-semibold mb-2">Мета: Стимулювати використання продукту та будувати довгострокові відносини.</h5>
+                            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                                <li><strong>Активація та перша транзакція:</strong> Спеціальні пропозиції для нових клієнтів (welcome bonuses).</li>
+                                <li><strong>X-Sell та Up-Sell:</strong> Пропозиції збільшення кредитного ліміту, супутніх продуктів (страхування).</li>
+                                <li><strong>Кампанії та акції:</strong> Сезонні пропозиції, партнерські знижки для стимулювання обороту.</li>
+                                <li><strong>Канали комунікацій:</strong> SMS, push-сповіщення, email-маркетинг, чат-боти. Важлива персоналізація та релевантність.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card overflow-hidden">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-gray-700">
+                        <span>3. Сервісне обслуговування та NPS (Servicing & NPS)</span>
+                        <span class="arrow text-blue-500">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-200">
+                            <h5 class="font-semibold mb-2">Мета: Забезпечити позитивний клієнтський досвід та високу лояльність.</h5>
+                            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                                <li><strong>Якість обслуговування:</strong> Швидкість та ефективність роботи контакт-центру, зручність мобільного додатку.</li>
+                                <li><strong>Робота зі скаргами:</strong> Аналіз причин звернень та їх усунення на системному рівні.</li>
+                                <li><strong>NPS (Net Promoter Score):</strong> Регулярне вимірювання індексу лояльності. Аналіз фідбеку "промоутерів", "нейтралів" та "критиків".</li>
+                                <li><strong>Програми лояльності:</strong> Системи бонусів, кешбеку, що заохочують постійне користування карткою.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card overflow-hidden">
+                    <button class="accordion-button w-full flex justify-between items-center p-5 text-left font-semibold text-gray-700">
+                        <span>4. Кредитні ризики та скоринг (Credit Scores & Risks)</span>
+                        <span class="arrow text-blue-500">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-200">
+                            <h5 class="font-semibold mb-2">Мета: Мінімізувати кредитні збитки, зберігаючи збалансований ріст портфеля.</h5>
+                            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                                <li><strong>Скорингові моделі:</strong> Application-scoring (оцінка при видачі), behavioral-scoring (аналіз поведінки існуючих клієнтів), collection-scoring (прогнозування повернення боргу).</li>
+                                <li><strong>Управління кредитним лімітом (CLM):</strong> Політики встановлення початкового ліміту та його подальшого перегляду.</li>
+                                <li><strong>Моніторинг портфеля:</strong> Аналіз "вінтажів" (когорт), матриці міграції заборгованості, розрахунок резервів.</li>
+                                <li><strong>Стратегії стягнення (Collections):</strong> Робота з простроченою заборгованістю на різних етапах (soft, hard, legal).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="roadmap" class="mb-16">
+            <h3 class="text-3xl font-bold text-gray-800 mb-12 text-center">Ваш покроковий Roadmap</h3>
+            <div class="max-w-3xl mx-auto">
+                <div class="roadmap-step">
+                    <div class="roadmap-dot"></div>
+                    <h4 class="font-bold text-xl mb-2">Місяці 1-3: Занурення в основи</h4>
+                    <p class="text-gray-600">Сконцентруйтеся на внутрішніх даних та процесах. Вивчіть P&L вашого продукту, основні KPI, існуючі політики по ризиках та залученню. Пройдіть шлях клієнта від подачі заявки до отримання картки. Познайомтеся з ключовими стейкхолдерами в ризиках, маркетингу, обслуговуванні.</p>
+                </div>
+                <div class="roadmap-step">
+                    <div class="roadmap-dot"></div>
+                    <h4 class="font-bold text-xl mb-2">Місяці 4-6: Аналіз та перші гіпотези</h4>
+                    <p class="text-gray-600">Почніть глибокий аналіз. Побудуйте воронку залучення, проаналізуйте вінтажі за рівнем ризику. Проведіть сегментацію клієнтської бази. Визначте основні причини скарг та низького NPS. Сформулюйте перші гіпотези для покращення (наприклад, "Якщо ми спростимо анкету, конверсія зросте на 5%").</p>
+                </div>
+                <div class="roadmap-step">
+                    <div class="roadmap-dot"></div>
+                    <h4 class="font-bold text-xl mb-2">Місяці 7-12: Тестування та оптимізація</h4>
+                    <p class="text-gray-600">Час для A/B тестів. Запустіть пілотні проекти: нова промо-акція, зміна критеріїв видачі для невеликого сегменту, новий скрипт для контакт-центру. Вимірюйте результати та приймайте рішення на основі даних. Оптимізуйте канали залучення, відключаючи неефективні та масштабуючи успішні.</p>
+                </div>
+                <div class="roadmap-step">
+                    <div class="roadmap-dot"></div>
+                    <h4 class="font-bold text-xl mb-2">Рік+ : Стратегічне управління</h4>
+                    <p class="text-gray-600">Ви вже добре розумієте свій портфель. Тепер ви можете працювати над довгостроковою стратегією: розробка нових продуктів, вихід на нові сегменти ринку, впровадження предиктивних моделей на основі машинного навчання, автоматизація процесів управління лімітами та комунікаціями.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources">
+            <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center">Корисні ресурси</h3>
+             <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="card p-6">
+                    <h4 class="font-bold text-lg mb-3 text-blue-600">Книги та блоги</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-600">
+                        <li><strong>"The Credit Card Industry: A Practical Guide"</strong> by Bill Hardekopf</li>
+                        <li><strong>"Predictive Analytics"</strong> by Eric Siegel (для розуміння скорингу)</li>
+                        <li><strong>Блог "The Financial Brand"</strong> - багато статей про маркетинг та інновації в фінтеху.</li>
+                         <li><strong>Блог "Bain & Company"</strong> - звіти та статті про лояльність клієнтів, NPS.</li>
+                    </ul>
+                </div>
+                <div class="card p-6">
+                    <h4 class="font-bold text-lg mb-3 text-blue-600">Онлайн-курси та спільноти</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-600">
+                        <li><strong>Coursera/edX:</strong> Курси з "Financial Risk Management", "Marketing Analytics".</li>
+                        <li><strong>CFA Institute:</strong> Матеріали з аналізу кредитного ризику.</li>
+                        <li><strong>Профільні групи на LinkedIn:</strong> "Credit & Risk Management", "Cards & Payments Professionals".</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-500">
+            <p>&copy; 2025 Roadmap. Створено для допомоги в професійному розвитку.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    button.classList.toggle('open');
+
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    if (targetSection) {
+                        window.scrollTo({
+                            top: targetSection.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            function onScroll() {
+                let currentSection = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === currentSection) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', onScroll);
+        });
+    </script>
+</body>
+</html>
