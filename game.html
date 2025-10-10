@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фінансовий Планувальник</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        /* === Базові стилі та шрифти === */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Світліший фон */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px; 
+            text-align: center;
+        }
+
+        /* === Анімації для персонажа === */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-3px); }
+            40%, 80% { transform: translateX(3px); }
+        }
+
+        /* === Стилі для SVG персонажа === */
+        .character-area {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            background: #eef2ff; /* Дуже світло-синій */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .character-svg-wrapper {
+            width: 80px;
+            height: 80px;
+            display: inline-block;
+            transform-origin: bottom;
+            transition: transform 0.3s ease-in-out;
+            animation: pulse 2.5s infinite ease-in-out;
+            position: relative;
+        }
+
+        /* --- SVG-частини та їх переходи --- */
+        .character-svg-wrapper svg .mouth, .character-svg-wrapper svg .eyebrow {
+            transition: all 0.3s ease-in-out;
+            transform-origin: center center;
+        }
+
+        /* --- СТАНИ --- */
+        .character-svg-wrapper.error { animation: shake 0.5s 3; }
+        .character-svg-wrapper.error .mouth { d: path("M 30 55 Q 40 50 50 55"); } /* Сумний рот */
+        .character-svg-wrapper.error .eyebrow { transform: translateY(2px) rotate(5deg); } /* Зведені брови */
+        
+        .character-svg-wrapper.thinking { background-color: #fef3c7; border-radius: 50%; }
+        .character-svg-wrapper.thinking .mouth { d: path("M 30 55 Q 40 58 50 55"); } /* Легка посмішка */
+        
+        .character-svg-wrapper.victory { animation: pulse 1s infinite; } 
+        .character-svg-wrapper.victory .mouth { d: path("M 25 50 Q 40 65 55 50"); } /* Широка усмішка */
+
+
+        .character-text {
+            font-size: 1rem;
+            color: #374151;
+            font-weight: 600;
+            min-height: 25px;
+            margin-top: 10px;
+            background: #ffffff;
+            padding: 8px 15px;
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* === Кнопки керування === */
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .btn:active:not(.disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+        }
+        .btn.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Стилі для секцій */
+        .resource-card {
+            background-color: #f9fafb;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-wealth {
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+
+        /* Секція розподілу коштів */
+        .allocation-section {
+            background: #f0fdf4; /* Світло-зелений фон */
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 2px solid #34d399;
+        }
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            width: 100px;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #10b981;
+            font-weight: 600;
+        }
+        .input-group input {
+            width: 100px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            text-align: right;
+        }
+        .allocation-button {
+            background-color: #10b981;
+            box-shadow: 0 4px 0 #059669;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1 class="text-3xl font-extrabold text-gray-800 mb-2">Фінансовий Планувальник</h1>
+    <p class="text-gray-500 mb-4">Розподіли кошти, щоб максимізувати загальний капітал за 12 місяців!</p>
+
+    <!-- Інформаційна панель -->
+    <div class="flex justify-between items-center mb-4">
+        <div class="text-lg font-bold text-blue-600">
+            Місяць: <span id="current-month">1 / 12</span>
+        </div>
+        <div class="total-wealth font-extrabold text-green-700">
+            Капітал: <span id="total-wealth">1000</span> грн
+        </div>
+    </div>
+    
+    <!-- Секція Персонажа -->
+    <div class="character-area">
+        <div class="character-svg-wrapper" id="character-svg-wrapper">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Тіло (Корпус-Монета) -->
+                <circle cx="40" cy="40" r="35" fill="#facc15"/>
+                <circle cx="40" cy="40" r="30" fill="#fef08a"/>
+                <text x="40" y="45" font-size="20" font-weight="900" fill="#f97316" text-anchor="middle">G</text> 
+                
+                <!-- Очі -->
+                <circle cx="30" cy="30" r="4" fill="black"/>
+                <circle cx="50" cy="30" r="4" fill="black"/>
+                
+                <!-- Брови (для емоцій) -->
+                <path d="M25 25 C30 20 35 20" stroke="black" stroke-width="2" stroke-linecap="round" fill="none" class="eyebrow"/>
+                <path d="M45 20 C50 15 55 20" stroke="black" stroke-width="2" stroke-linecap="round" fill="none" class="eyebrow"/>
+
+                <!-- Рот (для емоцій) -->
+                <path d="M 30 50 Q 40 55 50 50" stroke="black" stroke-width="2" stroke-linecap="round" fill="none" class="mouth"/>
+            </svg>
+        </div>
+        <div class="character-text" id="character-text">Привіт! Почнемо планування?</div>
+    </div>
+
+    <!-- Ресурси -->
+    <div class="resource-cards">
+        <div class="resource-card bg-yellow-500/10 text-yellow-700">
+            <span>💵 Готівка (Cash)</span>
+            <span id="cash-display">0</span>
+        </div>
+        <div class="resource-card bg-red-500/10 text-red-700">
+            <span>🔥 Борг (Debt)</span>
+            <span id="debt-display">0</span>
+        </div>
+        <div class="resource-card bg-green-500/10 text-green-700">
+            <span>📈 Інвестиції (Investment)</span>
+            <span id="investment-display">0</span>
+        </div>
+        <div class="resource-card bg-blue-500/10 text-blue-700">
+            <span>🛡️ Заощадження (Savings)</span>
+            <span id="savings-display">0</span>
+        </div>
+    </div>
+
+    <button id="start-button" class="btn bg-blue-600 hover:bg-blue-700 mt-5" style="box-shadow: 0 4px 0 #1e40af;">
+        ПОЧАТИ ПЛАНУВАННЯ
+    </button>
+    
+    <!-- Секція розподілу коштів (видима тільки під час гри) -->
+    <div id="allocation-ui" class="allocation-section hidden">
+        <h3 class="text-xl font-bold text-gray-700 mb-3">Розподіл коштів:</h3>
+        
+        <div id="event-message" class="mb-4 p-2 rounded text-sm font-medium bg-white text-gray-700">
+            Очікування події...
+        </div>
+
+        <div class="input-group">
+            <label>Погасити Борг (🔥)</label>
+            <input type="number" id="input-debt" value="0" min="0" oninput="validateAllocation()">
+        </div>
+        <div class="input-group">
+            <label>Інвестувати (📈)</label>
+            <input type="number" id="input-investment" value="0" min="0" oninput="validateAllocation()">
+        </div>
+        <div class="input-group">
+            <label>Заощадити (🛡️)</label>
+            <input type="number" id="input-savings" value="0" min="0" oninput="validateAllocation()">
+        </div>
+        
+        <div id="remaining-cash" class="text-sm font-semibold mt-2 text-gray-600">Залишок готівки: <span class="text-green-600">0</span> грн</div>
+
+        <button id="allocate-button" class="btn allocation-button w-full hover:bg-green-600 disabled:opacity-50">
+            ПЕРЕЙТИ ДО НАСТУПНОГО МІСЯЦЯ
+        </button>
+    </div>
+</div>
+
+<script>
+    // Ініціалізація DOM елементів
+    const startButton = document.getElementById('start-button');
+    const allocateButton = document.getElementById('allocate-button');
+    const allocationUI = document.getElementById('allocation-ui');
+    const characterSvgWrapper = document.getElementById('character-svg-wrapper');
+    const characterText = document.getElementById('character-text');
+    const monthDisplay = document.getElementById('current-month');
+    const totalWealthDisplay = document.getElementById('total-wealth');
+    const eventMessage = document.getElementById('event-message');
+    const remainingCashDisplay = document.querySelector('#remaining-cash span');
+
+    // Дисплеї ресурсів
+    const cashDisplay = document.getElementById('cash-display');
+    const debtDisplay = document.getElementById('debt-display');
+    const investmentDisplay = document.getElementById('investment-display');
+    const savingsDisplay = document.getElementById('savings-display');
+
+    // Поля введення
+    const inputDebt = document.getElementById('input-debt');
+    const inputInvestment = document.getElementById('input-investment');
+    const inputSavings = document.getElementById('input-savings');
+
+    // === Ігрові Змінні ===
+    let gameData = {};
+    let currentMonth = 0;
+    const MAX_MONTHS = 12;
+    let audioContext = null; // Для вирішення проблеми зі звуком
+
+    // === Налаштування Звуку (Фікс для AudioContext) ===
+    function initAudioContext() {
+        if (!audioContext) {
+            try {
+                // Ініціалізація тільки після першого кліку користувача
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.error("AudioContext initialization failed:", e);
+                // Залишаємо audioContext null, якщо помилка
+            }
+        }
+    }
+
+    function playTone(freq, duration = 0.1) {
+        if (!audioContext) return; // Не граємо, якщо AudioContext не ініціалізовано
+
+        try {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + duration);
+        } catch (e) {
+            console.error("Error playing tone:", e);
+        }
+    }
+
+    // === Логіка Персонажа та UI ===
+    function setCharacterState(state = 'idle', text = '') {
+        characterSvgWrapper.classList.remove('error', 'thinking', 'victory');
+        if (state !== 'idle') {
+            characterSvgWrapper.classList.add(state);
+        }
+        if (text) {
+            characterText.textContent = text;
+        }
+    }
+
+    function updateUI() {
+        cashDisplay.textContent = Math.round(gameData.cash);
+        debtDisplay.textContent = Math.round(gameData.debt);
+        investmentDisplay.textContent = Math.round(gameData.investment);
+        savingsDisplay.textContent = Math.round(gameData.savings);
+
+        gameData.totalWealth = gameData.cash + gameData.investment + gameData.savings - gameData.debt;
+        totalWealthDisplay.textContent = Math.round(gameData.totalWealth);
+        monthDisplay.textContent = `${currentMonth} / ${MAX_MONTHS}`;
+        
+        // Оновлення кольору капіталу
+        totalWealthDisplay.classList.toggle('text-green-700', gameData.totalWealth >= 1000);
+        totalWealthDisplay.classList.toggle('text-red-700', gameData.totalWealth < 1000);
+    }
+    
+    // === Ігрова Логіка ===
+
+    // Випадкові події для кожного місяця
+    const events = [
+        { name: "Зарплата", cash: 500, type: 'good', sound: 600, advice: "Гарний початок! Пам'ятай про борги." },
+        { name: "Несподіваний рахунок", cash: -200, type: 'bad', sound: 200, advice: "Ох, непередбачені витрати. Треба економити!" },
+        { name: "Бонус від роботи", cash: 350, type: 'good', sound: 700, advice: "Відмінно! Час подумати про інвестиції." },
+        { name: "Мінімальна зарплата", cash: 100, type: 'neutral', sound: 500, advice: "Це базові надходження. Плануй розумно." },
+        { name: "Повернення податку", cash: 150, type: 'good', sound: 650, advice: "Невеликий, але приємний бонус для заощаджень." }
+    ];
+
+    function applyEvent() {
+        const event = events[Math.floor(Math.random() * events.length)];
+        
+        // Зміна готівки
+        gameData.cash += event.cash;
+
+        // Оновлення повідомлення про подію
+        eventMessage.textContent = `Подія: ${event.name}! ${event.cash >= 0 ? '+' : ''}${event.cash} грн.`;
+        eventMessage.className = `mb-4 p-2 rounded text-sm font-medium ${event.type === 'good' ? 'bg-green-100 text-green-700' : event.type === 'bad' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`;
+        
+        playTone(event.sound);
+        
+        // Оновлення стану персонажа з порадою
+        setCharacterState(event.type === 'good' ? 'victory' : event.type === 'bad' ? 'error' : 'thinking', event.advice);
+    }
+    
+    // Логіка зростання/втрат
+    function applyMonthlyInterest() {
+        // 1. Борг (завжди зростає, якщо є)
+        if (gameData.debt > 0) {
+            const interest = gameData.debt * 0.05; // 5% щомісяця
+            gameData.debt += interest;
+            playTone(150); // Низький, тривожний тон
+        }
+        
+        // 2. Заощадження (малий, стабільний приріст)
+        if (gameData.savings > 0) {
+            const interest = gameData.savings * 0.01; // 1% щомісяця
+            gameData.savings += interest;
+        }
+
+        // 3. Інвестиції (високий ризик/винагорода)
+        if (gameData.investment > 0) {
+            // Випадкова зміна від -10% до +15%
+            const changeFactor = (Math.random() * 0.25) - 0.10; 
+            const change = gameData.investment * changeFactor;
+            gameData.investment += change;
+            
+            if (change > 0) {
+                playTone(880); // Успіх
+            } else {
+                playTone(330); // Втрата
+            }
+        }
+    }
+
+    // === Керування введенням ===
+    function validateAllocation() {
+        let debtAmount = Math.max(0, parseInt(inputDebt.value) || 0);
+        let investAmount = Math.max(0, parseInt(inputInvestment.value) || 0);
+        let saveAmount = Math.max(0, parseInt(inputSavings.value) || 0);
+        
+        const currentCash = Math.round(gameData.cash);
+        const totalAllocated = debtAmount + investAmount + saveAmount;
+        
+        // Обмеження: не можна погасити більше боргу, ніж є
+        const actualDebtPaid = Math.min(debtAmount, gameData.debt);
+        
+        // Обмеження: не можна витратити більше, ніж є готівки
+        const availableCashForAllocation = currentCash;
+
+        if (totalAllocated > availableCashForAllocation) {
+            // Якщо перевищено ліміт, обмежуємо останнє поле
+            const difference = totalAllocated - availableCashForAllocation;
+            if (saveAmount > 0) {
+                inputSavings.value = Math.max(0, saveAmount - difference);
+            } else if (investAmount > 0) {
+                inputInvestment.value = Math.max(0, investAmount - difference);
+            } else {
+                // Якщо неможливо обмежити, скидаємо
+                inputDebt.value = Math.max(0, debtAmount - difference);
+            }
+            // Перераховуємо після корекції
+            debtAmount = Math.max(0, parseInt(inputDebt.value) || 0);
+            investAmount = Math.max(0, parseInt(inputInvestment.value) || 0);
+            saveAmount = Math.max(0, parseInt(inputSavings.value) || 0);
+        }
+
+        const finalAllocated = parseInt(inputDebt.value || 0) + parseInt(inputInvestment.value || 0) + parseInt(inputSavings.value || 0);
+        const remaining = currentCash - finalAllocated;
+
+        remainingCashDisplay.textContent = Math.round(remaining);
+        remainingCashDisplay.classList.toggle('text-red-600', remaining < 0);
+        remainingCashDisplay.classList.toggle('text-green-600', remaining >= 0);
+
+        allocateButton.disabled = finalAllocated > currentCash;
+    }
+
+    // === Головний цикл гри ===
+    function nextMonth() {
+        if (currentMonth >= MAX_MONTHS) {
+            endGame();
+            return;
+        }
+
+        // 1. Збір даних з полів
+        const debtPayment = Math.max(0, parseInt(inputDebt.value) || 0);
+        const investment = Math.max(0, parseInt(inputInvestment.value) || 0);
+        const savings = Math.max(0, parseInt(inputSavings.value) || 0);
+        
+        const totalAllocated = debtPayment + investment + savings;
+
+        if (totalAllocated > gameData.cash) {
+             // Цього не повинно статися через validateAllocation, але для безпеки
+            alert("Помилка розподілу! Витрачено більше готівки, ніж доступно.");
+            return;
+        }
+
+        // 2. Виконання розподілу
+        gameData.cash -= totalAllocated;
+        
+        // Борг: не можна погасити більше, ніж є боргу
+        const actualDebtPaid = Math.min(debtPayment, gameData.debt);
+        gameData.debt -= actualDebtPaid;
+        
+        gameData.investment += investment;
+        gameData.savings += savings;
+
+        // 3. Застосування щомісячних відсотків/зростання
+        applyMonthlyInterest();
+
+        // 4. Перехід до наступного місяця
+        currentMonth++;
+        
+        // 5. Нова подія та оновлення UI
+        if (currentMonth <= MAX_MONTHS) {
+            applyEvent(); // Вплив на Cash
+            updateUI();
+            
+            // Скидання полів введення
+            inputDebt.value = 0;
+            inputInvestment.value = 0;
+            inputSavings.value = 0;
+            remainingCashDisplay.textContent = Math.round(gameData.cash);
+        } else {
+            endGame();
+        }
+
+        validateAllocation();
+    }
+
+    function startGame() {
+        initAudioContext(); // Ініціалізація AudioContext при першому кліку
+        
+        currentMonth = 1;
+        gameData = {
+            cash: 500,
+            debt: 300,
+            investment: 0,
+            savings: 200,
+            totalWealth: 400 
+        };
+
+        startButton.classList.add('hidden');
+        allocationUI.classList.remove('hidden');
+        allocateButton.disabled = false;
+        
+        // Скидання полів
+        inputDebt.value = 0;
+        inputInvestment.value = 0;
+        inputSavings.value = 0;
+
+        applyEvent(); // Подія першого місяця
+        updateUI();
+        validateAllocation();
+        setCharacterState('thinking', "Початковий капітал розподілено. Час приймати перші рішення!");
+    }
+
+    function endGame() {
+        allocateButton.disabled = true;
+        
+        const finalWealth = gameData.totalWealth;
+        let resultMessage = `Гра завершена! Твій фінальний капітал: ${Math.round(finalWealth)} грн.`;
+        
+        if (finalWealth > 2000) {
+            resultMessage += " 🏆 Ти — фінансовий геній! Капітал значно зріс.";
+            setCharacterState('victory', "Неймовірно! Це був майстер-клас з планування!");
+        } else if (finalWealth >= 1000) {
+            resultMessage += " ✅ Чудовий результат! Ти зберіг і примножив капітал.";
+            setCharacterState('thinking', "Хороший результат. Спробуй побити цей рекорд!");
+        } else {
+            resultMessage += " 😔 На жаль, капітал зменшився. Варто переглянути стратегію.";
+            setCharacterState('error', "Не засмучуйся! Наступного разу більше уваги приділяй боргам.");
+        }
+        
+        eventMessage.textContent = resultMessage;
+        eventMessage.className = `mb-4 p-2 rounded text-base font-extrabold ${finalWealth >= 1000 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`;
+
+        startButton.textContent = "ПОЧАТИ ЗНОВУ";
+        startButton.classList.remove('hidden');
+        allocationUI.classList.add('hidden');
+    }
+
+    // === Обробники подій ===
+    startButton.addEventListener('click', startGame);
+    allocateButton.addEventListener('click', nextMonth);
+    
+    // Перевірка введення в реальному часі
+    inputDebt.addEventListener('input', validateAllocation);
+    inputInvestment.addEventListener('input', validateAllocation);
+    inputSavings.addEventListener('input', validateAllocation);
+
+    // Ініціалізація стану UI
+    updateUI();
+    document.getElementById('remaining-cash').textContent = '';
+</script>
+
+</body>
+</html>
+
