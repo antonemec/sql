@@ -270,8 +270,68 @@
             'phrase': 'bg-blue-100 text-blue-800 border-blue-200'
         };
 
+        
         // DOM Elements
-        grid.innerHTML = data.map(createCard).join('');
+        const grid = document.getElementById('grid-container');
+        const countDisplay = document.getElementById('count-display');
+        const emptyState = document.getElementById('empty-state');
+        const searchInput = document.getElementById('searchInput');
+
+        // Initial Logic
+        let currentFilter = 'all';
+
+        function init() {
+            lucide.createIcons();
+            renderCards(dictionary);
+            
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                filterAndRender(currentFilter, term);
+            });
+        }
+
+        function createCard(item) {
+            const typeClass = typeColors[item.t] || 'bg-gray-100 text-gray-800';
+            const typeLabel = typeLabels[item.t] || item.t;
+
+            return `
+            <div class="card-container group" onclick="this.classList.toggle('flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider border ${typeClass}">
+                            ${typeLabel}
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 text-center serif-font mb-2 break-words w-full">${item.w}</h2>
+                        <div class="w-12 h-1 bg-red-600 rounded-full mb-3"></div>
+                        <p class="text-sm text-gray-500 text-center italic">Натисни, щоб дізнатись суть</p>
+                    </div>
+                    <div class="card-back">
+                        <div class="flex flex-col h-full w-full">
+                            <h3 class="text-lg font-bold text-red-400 mb-2 border-b border-gray-600 pb-1">${item.w}</h3>
+                            <p class="text-sm text-gray-200 mb-4 flex-grow">${item.m}</p>
+                            
+                            <div class="bg-gray-800/50 p-2 rounded border border-gray-600">
+                                <span class="text-xs text-gray-500 uppercase block mb-1">Приклад:</span>
+                                <p class="text-sm text-yellow-500 italic">"${item.e}"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderCards(data) {
+            countDisplay.innerText = data.length;
+            
+            if (data.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            grid.innerHTML = data.map(createCard).join('');
             
             // Re-animate entrance (optional polish)
             const cards = grid.querySelectorAll('.card-container');
