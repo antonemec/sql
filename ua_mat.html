@@ -271,43 +271,75 @@
         };
 
         // DOM Elements
-        const grid = document.getElementById('grid-container');
-        const countDisplay = document.getElementById('count-display');
-        const emptyState = document.getElementById('empty-state');
-        const searchInput = document.getElementById('searchInput');
-
-        // Initial Logic
-        let currentFilter = 'all';
-
-        function init() {
-            lucide.createIcons();
-            renderCards(dictionary);
+        grid.innerHTML = data.map(createCard).join('');
             
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                filterAndRender(currentFilter, term);
+            // Re-animate entrance (optional polish)
+            const cards = grid.querySelectorAll('.card-container');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.animation = `fadeIn 0.3s ease-out forwards ${index * 0.03}s`;
             });
         }
 
-        function createCard(item) {
-            const typeClass = typeColors[item.t] || 'bg-gray-100 text-gray-800';
-            const typeLabel = typeLabels[item.t] || item.t;
+        function filterCards(type) {
+            currentFilter = type;
+            
+            // Update visual state of buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if(btn.innerText.toLowerCase().includes(typeLabels[type]?.toLowerCase() || type)) {
+                    btn.classList.add('bg-gray-800', 'text-white');
+                    btn.classList.remove('bg-white', 'text-gray-700');
+                } else {
+                    btn.classList.remove('bg-gray-800', 'text-white');
+                    btn.classList.add('bg-white', 'text-gray-700');
+                }
+            });
 
-            return `
-            <div class="card-container group" onclick="this.classList.toggle('flipped')">
-                <div class="card-inner">
-                    <div class="card-front">
-                        <div class="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider border ${typeClass}">
-                            ${typeLabel}
-                        </div>
-                        <h2 class="text-2xl font-bold text-gray-900 text-center serif-font mb-2 break-words w-full">${item.w}</h2>
-                        <div class="w-12 h-1 bg-red-600 rounded-full mb-3"></div>
-                        <p class="text-sm text-gray-500 text-center italic">Натисни, щоб дізнатись суть</p>
-                    </div>
-                    <div class="card-back">
-                        <div class="flex flex-col h-full w-full">
-                            <h3 class="text-lg font-bold text-red-400 mb-2 border-b border-gray-600 pb-1">${item.w}</h3>
-                            <p class="text-sm text-gray-200 mb-4 flex-grow">${item.m}</p>
-                            
-                            <div class="bg-gray-800/50 p-2 rounded border border-gray-600">
-                                <span class="text-xs text-gray-500 uppercase block mb-1">Приклад:</spa
+            // If 'all' button is clicked explicitly
+            if(type === 'all') {
+                 const allBtn = document.querySelector('button[onclick="filterCards(\'all\')"]');
+                 document.querySelectorAll('.filter-btn').forEach(b => {
+                     b.classList.remove('bg-gray-800', 'text-white');
+                     b.classList.add('bg-white', 'text-gray-700');
+                 });
+                 allBtn.classList.remove('bg-white', 'text-gray-700');
+                 allBtn.classList.add('bg-gray-800', 'text-white');
+            }
+
+            filterAndRender(currentFilter, searchInput.value.toLowerCase());
+        }
+
+        function filterAndRender(type, searchTerm) {
+            let filtered = dictionary;
+
+            // 1. Filter by Category
+            if (type !== 'all') {
+                filtered = filtered.filter(item => item.t === type);
+            }
+
+            // 2. Filter by Search Term
+            if (searchTerm) {
+                filtered = filtered.filter(item => 
+                    item.w.toLowerCase().includes(searchTerm) || 
+                    item.m.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            renderCards(filtered);
+        }
+
+        // Add keyframes for animation
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        init();
+
+    </script>
+</body>
+</html>
